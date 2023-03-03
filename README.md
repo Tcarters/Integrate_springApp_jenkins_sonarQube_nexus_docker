@@ -423,7 +423,7 @@ At this step we have to configure a Nexus Repo for Jenkins integration.
 
 ![image](https://user-images.githubusercontent.com/71230412/222642668-e5579279-9d21-4ace-a933-02e0ed51660c.png)
 
-## 6. Build the Docker Image of our Application after Nexus stage
+## Step 6: Build the Docker Image of our Application after Nexus stage
   
 ### 6.1 Define a Dockerfile 
 
@@ -483,3 +483,42 @@ At this step we have to configure a Nexus Repo for Jenkins integration.
 
 ![image](https://user-images.githubusercontent.com/71230412/222646436-c5aef630-12d6-4535-9981-4143e2cfc662.png)
 
+
+## Step 7: Push the App Image to DockerHub
+### 7.1 Get script from Pipeline Syntax
+- Looking at ``Dashboard > current Job > Pipeline Syntax`` and select ``withCredentials`` by which we can bind our DockerHub credentials to Jenkins variable
+
+  ![image](https://user-images.githubusercontent.com/71230412/222600807-3cd0b163-b0e5-406c-ae49-48d23f8ae7c9.png)
+
+- Under **Bindings**, choose **Secret text**
+- After Provide your ``DockerHub Account password`` and then click ``Generate Pipeline Script``
+  
+![image](https://user-images.githubusercontent.com/71230412/222602160-f1475daa-2cf0-4f01-bb7e-9723728a6cd0.png)
+
+- Copy above script to update our new stage in jenkinsfile
+
+### 7.2 Update the Jenkinsfile with a new stage for Image push  
+- Our new stage to be added will be:
+  
+  ```bash
+         stage('Push Image to DockerHub'){
+            steps{
+                script{
+                    echo 'Logging to Docker registry.....'
+                    withCredentials([string(credentialsId: 'mytcdocker-hub', variable: 'dockerhub-pwd')]) {
+                        sh 'docker login -u tcdocker2021 -p ${dockerhub-pwd}'  //logging to my DockerHub account
+                    }
+                    echo 'Starting the push of Docker Image ....'
+                    sh ' docker push tcdocker2021/springbt-in-docker:fromNexus_Snapshot'
+                }
+            }
+        } // end stage10 
+  ```
+### 7.3 Visualizing Results of Image deployed on DockerHub
+- On the DockerHub Dashboard, we can see our App Image successfully deployed with tag **fromNexus_Snapshot**
+  
+  ![image](https://user-images.githubusercontent.com/71230412/222610829-27a7864f-f755-4a42-8d96-6ac90c2e865a.png)
+ 
+- Console Output View on Jenkins platform 
+
+- Dashboard view 
