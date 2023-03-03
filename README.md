@@ -149,4 +149,7 @@
   ```
 ### 3.2 Build the 4 stages in our pipeline and get Results:
 
+- Dashboard View of current build 
+
+![image](https://user-images.githubusercontent.com/71230412/222628182-99f5ed86-640b-4225-9fe4-6eca2276f98a.png)
 
