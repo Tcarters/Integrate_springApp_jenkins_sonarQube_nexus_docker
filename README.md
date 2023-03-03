@@ -216,3 +216,12 @@
             } //stage7
 
 ```
+-  Viewing the Console Output in Jenkins platform :
+
+![image](https://user-images.githubusercontent.com/71230412/222632385-5f275535-a4a7-484d-af62-e854cc5e0a02.png)
+
+- On the Dashboard after refresh , we can see a Notification below showing the Quality Gate Checking passed
+
+![image](https://user-images.githubusercontent.com/71230412/222632631-734479e6-0ef9-46e8-8851-6d796d97caea.png)
+
+
