@@ -153,3 +153,32 @@
 
 ![image](https://user-images.githubusercontent.com/71230412/222628182-99f5ed86-640b-4225-9fe4-6eca2276f98a.png)
 
+
+## Step 4: SonarQube Integration in Jenkins pipeline
+
+- Step 1.1 till 1.3 should be done before continuing here... 
+
+### 4.1 Update the Jenkinsfile with new stage:
+
+- The stage 6 for a **Static Code Analysis** by SonarQube Tool:
+
+    ```bash
+
+        stage('SonarQub Static code analysis'){  
+                steps{
+                    
+                    script{
+                        
+                        withSonarQubeEnv(credentialsId: 'SONARQUBE_TOKEN') {  // Here we refer tname of token configured in our Jenkins sonarQube Server plugin
+                            
+                            sh 'mvn clean package sonar:sonar'
+                        }
+                    } // end script
+                } // end steps
+            } //stage6
+
+    ```
+
+- Run the updated Jenkinsfile, we can see SonarQube Analysis performed
+
+
