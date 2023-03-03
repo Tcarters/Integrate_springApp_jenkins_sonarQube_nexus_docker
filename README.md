@@ -225,3 +225,197 @@
 ![image](https://user-images.githubusercontent.com/71230412/222632631-734479e6-0ef9-46e8-8851-6d796d97caea.png)
 
 
+## Step 5:  Nexus Server Integration to Jenkins server :
+At this step we have to configure a Nexus Repo for Jenkins integration.
+
+### 5.1 Create a Nexus repo
+- First, Launch your Nexus Server Machine: 
+
+  ![image](https://user-images.githubusercontent.com/71230412/221390012-3ffc0c6d-97c2-4b20-a708-daee244f7a74.png)
+ 
+- Create a new Nexus repository 
+  - We have to go : ``Settings > Repository `` , and click *Create repository*
+  - After select the type of repository as **Maven 2 hosted**
+  - Ok, now Put a name `javaapp-release`
+      ![image](https://user-images.githubusercontent.com/71230412/221390255-99c12501-d454-4444-b86f-b1ad82a081ed.png)
+  
+  - As we are creating a Nexus release repository so , we keep the ``Version policy`` as : **Release**
+  - And finally, click ``Create repository`` to create it :
+
+  ![image](https://user-images.githubusercontent.com/71230412/221390373-bad08de0-ce6c-4b12-9986-e82b8b8b6089.png)
+
+### 5.2 Configure a connection between Nexus server and Jenkins Server
+  
+- For that we have to install a Jenkins plugin called  **Nexus Artifact Uploader**
+  
+    ![image](https://user-images.githubusercontent.com/71230412/221391986-14a87b00-185e-4d8d-be25-7ce270babb63.png)
+  
+- Get the nexus integration script
+    * To do it just go to the current job **Pipeline Syntax** at ``Dashboard >javaapp>Pipeline Syntax`` 
+
+  ![image](https://user-images.githubusercontent.com/71230412/221393421-0e528a4e-a532-4880-897e-329cee32095a.png)
+
+    * Set up the credentials to be used by jenkins for connection to nexus server
+  
+  ![image](https://user-images.githubusercontent.com/71230412/221393325-74da5461-68df-4866-9f23-1cbfb0e41608.png)
+
+    * Provide a `username` and `Password`, it should be the one configured on the nexus server ...
+  
+  ![image](https://user-images.githubusercontent.com/71230412/221393370-3ab9eda7-9cf1-4089-a8ff-bd11b22b360b.png)
+  
+    * And save it.
+  
+    * Now add a `GroupId`, which can be retrieve by looking at the **pom.xml** of the Application code.
+      
+        - In our example, It's **com.springIndocker**. Just by looking at the line ***11*** of the pom file of:  https://github.com/Tcarters/SpringBootApp_and_DevOps/blob/nexus-integration/pom.xml  on branch **nexus-integration**
+
+<br />
+
+  ![image](https://user-images.githubusercontent.com/71230412/221393511-5da8bf44-31bf-4f6b-953a-b8aa0cafcc41.png)  
+
+- Same process for the **Version**, here It's  ``1.0.0`` for **master** barnch
+- :exclamation: And ``1.0.1`` for the branch **nexus-integration**
+
+- For the Nexus ``Repository``configuration, looking at the nexus server repo created earlier  
+
+![image](https://user-images.githubusercontent.com/71230412/221393734-cbc3dd89-2b92-4698-ab38-7840e046f2ba.png)
+
+
+### 5.3 Create a new stage for Artifact release creation and uploading to Nexus Server
+
+- Now back to the Jenkins Pipeline Syntax page, provide **Artifacts** configuration by clicking on `Add` button like:
+ 
+![image](https://user-images.githubusercontent.com/71230412/221399239-37ae6ec4-bc74-446d-96e5-6d8a59e4fe92.png)
+
+- Provide an **ArtifactId** which can be get by looking again in the pom.xml file https://github.com/Tcarters/SpringBootApp_and_DevOps/blob/master/pom.xml 
+
+![image](https://user-images.githubusercontent.com/71230412/221399239-37ae6ec4-bc74-446d-96e5-6d8a59e4fe92.png)
+
+- For the `Type` , we choose a **Jar** file type
+
+- And finally the `File` name as `target/javaspringapp-v01.jar`, which should normally be available in the pom.xml file build code section line ...
+
+- Final Artifact review :
+  
+![image](https://user-images.githubusercontent.com/71230412/221394137-7e072b00-fcea-4ecc-873b-e35060e89042.png)
+
+
+- Still on current Job, Click Pipeline script to generate it 
+  - The Artifact script generated: 
+
+```bash
+    nexusArtifactUploader artifacts: [[artifactId: 'springbootV3-docker', classifier: '', file: 'target/javaspringapp-v01.jar', type:                           'jar']], credentialsId: '', groupId: 'com.springIndocker', nexusUrl: '192.168.1.19:5000', nexusVersion: 'nexus3', protocol: 'http',                          repository: 'javaapp-release ', version: '1.0.0'
+```
+![image](https://user-images.githubusercontent.com/71230412/221398679-5ea10c6b-fc0e-48ae-9af6-5fd009309bdb.png)
+
+### 5.4 Update the Jenkinsfile script with a new stage for nexus Integration :
+
+- First us tested with Master branch using the version ``1.0.0``  
+
+  ```bash
+        stage('Upload our Jar file to Nexus server '){
+            steps{
+                script {
+                    nexusArtifactUploader artifacts: [
+                        [
+                            artifactId: 'springbootV3-docker', 
+                            classifier: '', 
+                            file: 'target/javaspringapp-v01.jar', 
+                            type: 'jar'
+                        ]
+                    ],
+                    credentialsId: 'nexus-auth', 
+                    groupId: 'com.springIndocker', 
+                    nexusUrl: '192.168.1.19:5000', 
+                    nexusVersion: 'nexus3', 
+                    protocol: 'http', 
+                    repository: 'javaapp-release ', 
+                    version: '1.0.0'
+                }
+            } //end steps
+        } //stage8
+ 
+  ```
+- Result of The build process with the Master branch on version ``1.0.0 ``
+  
+  - Consultation of package uploaded on the ``Nexus server ``
+  
+![image](https://user-images.githubusercontent.com/71230412/221400231-a1b7a0ce-8760-41fb-972d-5dd37fd24091.png)
+ 
+### 5.5 Test again with version 1.0.1 of ``pom.xml`` on branch nexus-integration :
+- The pom.xml file of the package looks like :
+  
+  ![image](https://user-images.githubusercontent.com/71230412/222545675-484b7f27-8f3e-4711-a9c4-643cbb5ca907.png)
+
+- Build again the pipeline , we see a second package 1.0.1 in our nexus Repository  
+
+  ![image](https://user-images.githubusercontent.com/71230412/222545889-61c3ba03-0c92-489c-9edb-6319b0c767ee.png)
+
+
+- - -
+
+### Possible Errors to get while building the pipeline for Nexus Integration
+  
+#### Case of using ``pipeline utility steps`` 
+- In case , we got error for script Approval , click on the `blue` link link on below to get access to the script
+  
+![image](https://user-images.githubusercontent.com/71230412/222538172-11c82013-e7e3-4fce-8dd2-563eaf5030ac.png)
+
+- Click *Approve* to give it access 
+
+![image](https://user-images.githubusercontent.com/71230412/222538503-cd8b465f-7096-4ab5-8627-30f21c541cdf.png)
+
+- At the end of access given , we got : 
+![image](https://user-images.githubusercontent.com/71230412/222538784-b5e6b4a8-9251-40f5-9c67-787523f59594.png)
+
+- - -
+
+
+- :exclamation Step 5.4 & 5.5 for 5.6 are the same but we prefer the 5.6 because of the Dynamic support in the script
+
+### 5.6 Updating our Pipeline script with SNAPSHOT creation and Dynamic support :
+
+- For this step, we used the branch **nexus-snapshotrepo**
+
+- The stage 8 will be written like  this :
+
+```bash
+          stage('Upload our Jar file to Nexus server '){
+            steps{
+                script {
+                    def readPomVersion = readMavenPom file: 'pom.xml'
+                    
+                    def nexusRepo = readPomVersion.version.endsWith("SNAPSHOT") ? "javaapp-snapshot" : "javaapp-release"
+
+                    nexusArtifactUploader artifacts: [
+                        [
+                            artifactId: 'springbootV3-docker', 
+                            classifier: '', 
+                            file: 'target/javaspringapp-v01.jar', 
+                            type: 'jar'
+                        ]
+                    ],
+                    credentialsId: 'nexus-auth', 
+                    groupId: 'com.springIndocker', 
+                    nexusUrl: '192.168.1.19:5000', 
+                    nexusVersion: 'nexus3', 
+                    protocol: 'http', 
+                    repository:  nexusRepo, //'javaapp-release', 
+                    version: "${readPomVersion.version}" //using dynamic reading version     '1.0.0'
+                } // end script
+            } //end steps
+        }//stage8
+```
+- And Finally, run the pipeline with the new branch **nexus-snapshotrepo** for snapshot creation of the repository https://github.com/Tcarters/SpringBootApp_and_DevOps 
+
+
+### 5.7 Build Result 
+
+- On the Nexus platform, we can see our Artifact snaphost uploaded successfully by jenkins.
+
+  ![image](https://user-images.githubusercontent.com/71230412/222575776-82c0d959-5f07-4275-bd67-9192c6e69afd.png)
+
+- Console Output in Jenkins platform :
+
+- Jenkins Dashboard View Result :
+
