@@ -371,7 +371,7 @@ At this step we have to configure a Nexus Repo for Jenkins integration.
 - - -
 
 
-- :exclamation Step 5.4 & 5.5 for 5.6 are the same but we prefer the 5.6 because of the Dynamic support in the script
+- :exclamation: Step 5.4 & 5.5 for 5.6 are the same but we prefer the 5.6 because of the Dynamic support in the script :exclamation:
 
 ### 5.6 Updating our Pipeline script with SNAPSHOT creation and Dynamic support :
 
@@ -422,4 +422,60 @@ At this step we have to configure a Nexus Repo for Jenkins integration.
 - Jenkins Dashboard View Result :
 
 ![image](https://user-images.githubusercontent.com/71230412/222642668-e5579279-9d21-4ace-a933-02e0ed51660c.png)
+
+## 6. Build the Docker Image of our Application after Nexus stage
+  
+### 6.1 Define a Dockerfile 
+
+- For this step, we'll work with the branch  **nexus-snapshotrepo** of our current Repository: https://github.com/Tcarters/SpringBootApp_and_DevOps
+- And the Dockerfile is already defined in the gitHub repo for the above mentioned branch.
+
+- For that , we have to create a ``Dockerfile``
+    - Content of ``Dockerfile`` :
+  
+```bash
+      FROM maven as build
+      LABEL maintainer=" Tcarters a.k.a @Tdmund_"
+      WORKDIR /app 
+      COPY . .
+      RUN mvn install 
+
+      FROM openjdk:11.0
+      WORKDIR /app
+      COPY --from=build /app/target/javaspringapp-v01.jar /app/
+
+      EXPOSE 8080
+      CMD [ "java", "-jar", "javaspringapp-v01.jar" ]
+  
+```
+
+### 6.2 Update the Jenkinsfile with a new stage:
+
+- ❗Before continue, if docker isn't installed on local machine running jenkins; go and install it.
+
+- For Docker configuration and Integration to Jenkins , check this Repo: https://github.com/Tcarters/mini-DevOps-Project_jenkins-springBoot-Docker
+
+- New stage script :
+
+  ```bash
+        stage('Build Docker Image of App'){
+            steps{
+                script {
+                    echo 'Starting Docker Image building'
+                    echo 'Build Image from current Jenkins job-name & build-id'
+                    sh 'docker image build -t $JOB_NAME:v1.$BUILD_ID .' // Don't forget at cmd end ``point``
+                    echo 'Tag the Image with our DockerHub name'
+                    sh 'docker image tag $JOB_NAME:v1.$BUILD_ID tcdocker2021/springbt-in-docker:from_Nexus_Snapshot '
+                    echo 'Listing current Images '
+                    sh 'docker image ls'
+                }
+            }
+        } //end stage9
+        
+  ```
+#### 6.2.1 Result of the pipeline build 
+
+- Console Output view :
+
+- Dashboard View :
 
