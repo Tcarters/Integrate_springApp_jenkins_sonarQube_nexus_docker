@@ -1,0 +1,143 @@
+pipeline{
+    
+    agent any 
+    
+    stages {
+        
+        stage('Cloning Git Repo'){
+            
+            steps{
+                
+                script{
+                    
+                    git branch: 'nexus-integration', url: 'https://github.com/Tcarters/SpringBootApp_and_DevOps.git'
+                }
+            }
+        } //stage1
+        stage ('MAVEN Cleaning') {
+            steps{
+                script {
+                    sh 'mvn clean install'
+                }
+            }
+        }//stage2
+        stage('MAVEN UNIT Testing'){
+            
+            steps{
+                
+                script{
+                    
+                    sh 'mvn test'
+                }
+            }
+        }//stage3
+        stage('Integration Testing'){
+            
+            steps{
+                
+                script{
+                    
+                    sh 'mvn verify -DskipUnitTests'
+                }
+            }
+        }//stage4
+        stage('SonarQub Static code analysis'){
+            
+            steps{
+                
+                script{
+                    
+                    withSonarQubeEnv(credentialsId: 'SONARQUBE_TOKEN') {  // Here we refer tname of token configured in our Jenkins sonarQube Server plugin
+                        
+                        sh 'mvn clean package sonar:sonar'
+                    }
+                   }
+                    
+                }
+            }//stage5
+            stage('Quality Gate Status'){
+                steps{
+                    script {
+                        echo '<---------------Quality Gates Analysis Started-------------->'
+                        timeout (time: 5) {
+                             // Just in case something goes wrong, pipeline will be killed after a timeout
+                            // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
+                            // true = set pipeline to UNSTABLE, false = don't
+                        def myqualitygate = waitForQualityGate abortPipeline: true , credentialsId: 'SONARQUBE_TOKEN'  // Reuse taskId previously collected by withSonarQubeEnv
+                        if ( myqualitygate.status != 'OK' ) {
+                            echo "Pipeline aborted due to Quality Gate failure 🎃: ${myqualitygate.status}"
+                        }
+                        else {
+                            echo "Pipeline  succeeded with Quality Gate 🤗 : ${myqualitygate.status}"
+                        }
+                    } // end timeout
+                } // end script
+            } // end steps    
+        }//stage6
+
+        stage('Upload our Jar file to Nexus server '){
+            steps{
+                script {
+                    // declare a variable to read pom version
+                    def readPomVersion = readMavenPom file: 'pom.xml'
+
+                    def nexusRepo = readPomVersion.version.endsWith("SNAPSHOT") ? "javaapp-snapshot" : "javaapp-release"
+                    // if the pom file version ends with SNAPSHOT then upload artifact to `javaapp-snapshot` or else to `javaapp-release`
+                    nexusArtifactUploader artifacts: [
+                        [
+                            artifactId: 'springbootV3-docker', 
+                            classifier: '', 
+                            file: 'target/javaspringapp-v01.jar', 
+                            type: 'jar'
+                        ]
+                    ],
+                    credentialsId: 'nexus-auth', 
+                    groupId: 'com.springIndocker', 
+                    nexusUrl: '192.168.1.19:5000', 
+                    nexusVersion: 'nexus3', 
+                    protocol: 'http', 
+                    repository:  nexusRepo, //'javaapp-release', 
+                    version: "${readPomVersion.version}" //using dynamic reading version     '1.0.0'
+                }
+            } //end steps
+        } //stage7
+
+        stage('Build Docker Image of App'){
+            steps{
+                script {
+                    echo 'Starting Docker Image building'
+                    echo 'Build Image from current Jenkins job-name & build-id'
+                    sh 'docker image build -t $JOB_NAME:v1.$BUILD_ID .' // Don't forget at cmd end ``point``
+                    echo 'Tag the Image with our DockerHub name'
+                    sh 'docker image tag $JOB_NAME:v1.$BUILD_ID tcdocker2021/springbt-in-docker:from_Nexus_Snapshot '
+                    echo 'Listing current Images '
+                    sh 'docker image ls'
+                }
+            }
+        } //end stage8
+        
+        stage('Push Image to DockerHub'){
+            steps{
+                script{
+                    echo 'Logging to Docker registry.....'
+                    withCredentials([string(credentialsId: 'mytcdocker-hub', variable: 'mydockerhubpwd')]) {
+                        sh 'docker login -u tcdocker2021 -p ${mydockerhubpwd}'  //logging to my DockerHub account
+                    }
+                    echo 'Starting the push of Docker Image ....'
+                    sh ' docker push tcdocker2021/springbt-in-docker:fromNexus_Snapshot'
+                }
+            }
+        } // end stage9 
+        stage ('Launch a container of App') {
+            steps {
+                script {
+                    echo 'Starting a local container of the App ....'
+                    sh 'docker run -dit --name springapp -p 8100:8080 tcdocker2021/springbt-in-docker:fromNexus_Snapshot '
+                    echo 'The App is now available at Port 8100 ....'
+                    echo 'Running Containers'
+                    sh 'docker ps -a '
+                }
+            }
+        } // end stage10
+    }       
+}
