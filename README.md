@@ -183,4 +183,8 @@
 
 ![image](https://user-images.githubusercontent.com/71230412/222630247-fb04dc69-8dcc-4583-b274-fe5154fe2fab.png)
 
+- On Jenkins dashboard View :
+
+![image](https://user-images.githubusercontent.com/71230412/222630680-6873a655-7e43-4195-bc7e-266d26809f98.png)
+
 
