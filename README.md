@@ -528,3 +528,31 @@ At this step we have to configure a Nexus Repo for Jenkins integration.
 
 ![image](https://user-images.githubusercontent.com/71230412/222648725-068a9bba-dea7-4877-b487-2c795ad0fe74.png)
 
+
+## Step 8: Launch a local Container of the App. 
+  
+- With Jenkinsfile , we have to add a new stage to launch a Docker container of the App. 
+
+- Content of new stage :
+  ```bash
+        stage ('Launch a container of App') {
+            steps {
+                script {
+                    echo 'Starting a local container of the App ....'
+                    sh 'docker run -dit --name springapp -p 8100:8080 tcdocker2021/springbt-in-docker:fromNexus_Snapshot '
+                    echo 'The App is now available at Port 8100 on http://jenkins-ip://81000/welcome ....'
+                }
+            }
+        } // end stage11
+  ```
+## 9. Final Results
+- On local Jenkins machine, we can see our Container launched successfully through Jenkins
+
+- Console Output View :
+
+
+- Dashboard View:  
+  
+
+### Waooooh , we did 🤟 ...... TIME TO GET A COFFE 😵....
+- **Idea for Next Project 🤔** And if we won't launch the Docker Container in local Jenkins Server but instead, we give this the to docker cluster orchestrator like K8s ? 🤔
