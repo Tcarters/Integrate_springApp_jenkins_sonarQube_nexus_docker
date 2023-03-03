@@ -179,6 +179,8 @@
 
     ```
 
-- Run the updated Jenkinsfile, we can see SonarQube Analysis performed
+- Run the updated Jenkinsfile, we can see SonarQube Analysis performed successfully
+
+![image](https://user-images.githubusercontent.com/71230412/222630247-fb04dc69-8dcc-4583-b274-fe5154fe2fab.png)
 
 
