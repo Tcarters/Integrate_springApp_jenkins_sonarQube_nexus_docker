@@ -549,10 +549,15 @@ At this step we have to configure a Nexus Repo for Jenkins integration.
 - On local Jenkins machine, we can see our Container launched successfully through Jenkins
 
 - Console Output View :
+<img src="https://user-images.githubusercontent.com/71230412/222651632-c871b7cc-d3ac-44bb-ad19-ebae706c2fbc.png" height="220%" width="90%" />
 
+<!-- ![image](https://user-images.githubusercontent.com/71230412/222651655-03d013c2-bd8f-42c3-a116-95e660ffa286.png) -->
+- Accessing the App on our local browser:
+
+![image](https://user-images.githubusercontent.com/71230412/222651908-2c121fba-7604-4f03-9011-3141b9283d8e.png)
 
 - Dashboard View:  
-  
+ ![image](https://user-images.githubusercontent.com/71230412/222651441-b6c0cb36-caed-4b70-8763-5bde83f35a08.png) 
 
 ### Waooooh , we did 🤟 ...... TIME TO GET A COFFE 😵....
-- **Idea for Next Project 🤔** And if we won't launch the Docker Container in local Jenkins Server but instead, we give this the to docker cluster orchestrator like K8s ? 🤔
+- **Idea for Next Project 🤔** And if we don't launch the Docker Container in local Jenkins Server but instead, we give this task to a cluster orchestrator like K8s... ? 🤔
