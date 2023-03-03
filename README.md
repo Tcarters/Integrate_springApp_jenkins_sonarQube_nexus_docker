@@ -76,3 +76,77 @@
 ## Step 3: Launch a new Jenkins pipeline
 
 ### 3.1 Create a new pipeline Job named `javaapp-pipeline`:
+
+<img src="https://github.com/Tcarters/Integrate_springApp_jenkins_sonarQube_nexus_docker/blob/master/Screenshots/s1-jobnew.png" width="50%" height="45%"/>
+
+- Next, jump to the section ``Pipeline`` and define the pipeline script to be executed by Jenkins. 
+
+- At this step, we used the branch **nexus-integration** or you can use `master`  and GitHub repo: https://github.com/Tcarters/SpringBootApp_and_DevOps
+
+- In our Jenkinsfile , we define four stages which go like this
+    - Stage 1 ==>  Clone the GitHub repo
+    - Stage 2 ==>  Code compiling
+    - Stage 3 ==>  MAVEN Cleaning
+    - Stage 4 ==>  UNIT TESTING OF MAVEN BUILD
+    - Stage 5 ==>  VERIFICATION OF UNIT TEST
+
+- The jenkinsfile code used is defined as :
+  
+  ```bash
+        pipeline{
+    
+            agent any 
+            
+            stages {
+                
+                stage('Cloning Git Repo'){
+                    
+                    steps{
+                        
+                        script{
+                            
+                            git branch: 'nexus-integration', url: 'https://github.com/Tcarters/SpringBootApp_and_DevOps.git'
+                        }
+                    }
+                } //stage1
+                stage('Compiling'){
+                    steps{
+                        script{
+                            sh 'mvn compile'
+                        }
+                    }
+                } // stage2
+                stage ('MAVEN Cleaning') {
+                    steps{
+                        script {
+                            sh 'mvn clean install'
+                        }
+                    }
+                }//stage3
+                stage('MAVEN UNIT Testing'){
+                    
+                    steps{
+                        
+                        script{
+                            
+                            sh 'mvn test'
+                        }
+                    }
+                }//stage4
+                stage('Integration Testing'){
+                    
+                    steps{
+                        
+                        script{
+                            
+                            sh 'mvn verify -DskipUnitTests'
+                        }
+                    }
+                }//stage5
+            } //end stages
+        } 
+
+  ```
+### 3.2 Build the 4 stages in our pipeline and get Results:
+
+
