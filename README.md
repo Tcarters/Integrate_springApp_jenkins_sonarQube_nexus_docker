@@ -477,5 +477,9 @@ At this step we have to configure a Nexus Repo for Jenkins integration.
 
 - Console Output view :
 
+![image](https://user-images.githubusercontent.com/71230412/222646353-5da33e6a-f6db-4489-8033-bd22ec2e6226.png)
+
 - Dashboard View :
+
+![image](https://user-images.githubusercontent.com/71230412/222646436-c5aef630-12d6-4535-9981-4143e2cfc662.png)
 
