@@ -188,3 +188,31 @@
 ![image](https://user-images.githubusercontent.com/71230412/222630680-6873a655-7e43-4195-bc7e-266d26809f98.png)
 
 
+### 4.2 Adding Quality Gate Analysis in the pipeline Integration:
+
+- To do that , we have to add a new stage7 in which SonarQube will perform a Quality Gate Condition checking of our code and if passsed, It will inform Jenkins to proceed to next build otherwise the pipeline will false and will enter in a rebuild process until the dev Team make a correction to the code.
+
+- The stage 7 code in jenkinsfile will be:
+ 
+```bash
+            stage('Quality Gate Status'){
+                steps{
+                    script {
+                        echo '<---------------Quality Gates Analysis Started-------------->'
+                        timeout (time: 5) {
+                                // Just in case something goes wrong, pipeline will be killed after a timeout
+                                // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
+                                // true = set pipeline to UNSTABLE, false = don't
+                        def myqualitygate = waitForQualityGate abortPipeline: true , credentialsId: 'SONARQUBE_TOKEN'  // Reuse taskId previously collected by withSonarQubeEnv
+                        if ( myqualitygate.status != 'OK' ) {
+                            echo "Pipeline aborted due to Quality Gate failure 🎃: ${myqualitygate.status}"
+                        }
+                        else {
+                            echo "Pipeline  succeeded with Quality Gate 🤗 : ${myqualitygate.status}"
+                        }
+                        } // end timeout
+                    } // end script
+                } // end steps    
+            } //stage7
+
+```
