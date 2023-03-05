@@ -1,4 +1,9 @@
-# Jenkins pipeline build using SpringApp + jenkins + SOnarQube + Nexus + Docker
+# Build a complete Jenkins pipeline by integrating a SpringApp with a Code Auditor, Nexus Repository Manager and Docker
+
+We build a Jenkins job which takes a code directly from gitHub, then proceed with maven life cycle policy and after integrate SonarQube for Code Analysis. At the end of code Analysis by SonarQube, the artifact generated is uploaded to a Repository Manager (Nexus) to keep each version of our App. Then a Docker image of the App is build and publish to DockerHub to finally launch a sample container running the application. 
+
+![cover](https://github.com/Tcarters/Integrate_springApp_jenkins_sonarQube_nexus_docker/blob/master/Screenshots/cover.jpg)
+
 
 ### Prerequisites :
 - Nexus Server Installed ( Mine is available at  **192.168.1.19:5000** )
